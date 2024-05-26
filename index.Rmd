@@ -38,8 +38,6 @@ In 1990, Washington state data showed stark differences in incarceration rates f
 The data was collected by vera, which is powered by hundreds of researchers and advocates working to transform the criminal law and immigration systems. The Vera Institute uses a variety of methods to collect and generate data, including working with government agencies, direct data requests and analysis of existing records. The purpose of collecting this data is to inform policy changes, support advocacy efforts, and advance justice reforms, specifically aimed at reducing excessive crime and the negative impact of the justice system on marginalized communities.There are about 91,031 rows and 23 columns in the dataset that I use. 
 
 ### Trends Over Time Chart
-
-
 ```{r}
 trends_wa <- data_wa %>%
   group_by(year) %>%

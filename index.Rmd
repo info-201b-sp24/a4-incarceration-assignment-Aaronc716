@@ -1,71 +1,112 @@
 ---
-title: "A3: Incarceration"
+title: 'Assignment 4: Incarceration'
 output: html_document
+date: "2024-05-25"
 ---
+```{r}
+library(ggplot2)
+library(dplyr)
+library(readr)
+```
 
 ### Introduction
-
-An introduction of the problem domain and a description of the variable(s) you are choosing to analyze (and why!)
+In this analysis, I want to examine prison incarceration rates for blacks and whites in 1990 in Washington state. By focusing on these demographic groups, I sought to uncover underlying disparities and patterns of racial inequality in the criminal justice system at the state and national levels. The selected years mark a key moment in history, providing a basis for comparison with more current data to assess how incarceration trends may have changed due to policy changes, social movements, or changes in society's attitudes toward crime and punishment. Understanding these dynamics can help address the systemic racial disparities that persist in the U.S. incarceration system. This comparative approach will help highlight the differences and similarities between the two groups in their impact on judicial practice
 
 ### Summary Information
+```{r}
+data_wa <- read.csv("https://github.com/melaniewalsh/Neat-Datasets/raw/main/us-prison-jail-rates-1990-WA.csv")
 
-Write a summary paragraph of findings that includes the 5 values calculated from your summary information R script
+data_wa_1990 <- filter(data_wa, year == 1990)
 
-These will likely be calculated using your DPLYR skills, answering questions such as: 
+summary_wa <- data_wa_1990 %>%
+  summarise(
+    Avg_Black_Rate_WA = mean(black_jail_pop_rate, na.rm = TRUE),
+    Max_Black_Rate_WA = max(black_jail_pop_rate, na.rm = TRUE),
+    Min_Black_Rate_WA = min(black_jail_pop_rate, na.rm = TRUE),
+    Avg_White_Rate_WA = mean(white_jail_pop_rate, na.rm = TRUE),
+    Max_White_Rate_Wa = max(white_jail_pop_rate, na.rm = TRUE),
+    Min_White_Rate_WA = min(white_jail_pop_rate, na.rm = TRUE)
+  )
 
-- What is the average value of my variable across all the counties (in the current year)?
-- Where is my variable the highest / lowest?
-- How much has my variable change over the last N years?
+print(summary_wa)
 
-Feel free to calculate and report values that you find relevant. Again, remember that the purpose is to think about how these measure of incarceration vary by race.
+```
+In 1990, Washington state data showed stark differences in incarceration rates for blacks and whites. On average, black incarceration rates are about 1,759 per 100,000 people, much higher than the white incarceration rate of 177 per 100,000 people. Blacks have the highest incarceration rate, an alarmingly high 7,266 per 100,000, while whites have a much lower incarceration rate of 348 per 100,000. Interestingly, the lowest black incarceration rate is zero, indicating that some counties have no blacks incarcerated, while the lowest white incarceration rate is about 19 per 100,000 people. The numbers highlight significant racial disparities in incarceration rates and point to deeper problems in the justice system that disproportionately affect black communities.
+
 
 ### The Dataset
-
-Who collected the data?  
-How was the data collected or generated?  
-Why was the data collected?  
-How many observations (rows) are in your data?  
-How many features (columns) are in the data?  
-What, if any, ethical questions or questions of power do you need to consider when working with this data?  
-What are possible limitations or problems with this data?   (at least 200 words)
-
+The data was collected by vera, which is powered by hundreds of researchers and advocates working to transform the criminal law and immigration systems. The Vera Institute uses a variety of methods to collect and generate data, including working with government agencies, direct data requests and analysis of existing records. The purpose of collecting this data is to inform policy changes, support advocacy efforts, and advance justice reforms, specifically aimed at reducing excessive crime and the negative impact of the justice system on marginalized communities.There are about 91,031 rows and 23 columns in the dataset that I use. 
 
 ### Trends Over Time Chart
 
-Include a chart. Make sure to describe why you included the chart, and what patterns emerged
 
-The first chart that you will create and include will show the trend over time of your variable/topic. Think carefully about what you want to communicate to your user (you may have to find relevant trends in the dataset first!). Here are some requirements to help guide your design:
+```{r}
+trends_wa <- data_wa %>%
+  group_by(year) %>%
+  summarise(
+    Avg_Black_Rate = mean(black_prison_pop_rate, na.rm = TRUE),
+    Avg_White_Rate = mean(white_prison_pop_rate, na.rm = TRUE)
+  )
 
-- Show more than one, but fewer than ~10 trends
-  - This may mean showing the same measure for different locations or different racial groups. Think carefully about a meaningful comparison of locations (e.g., the top 10 counties in a state, top 10 states, etc.)
-- You must have clear x and y axis labels
-- The chart needs a clear title 
-- You need a legend for your different line colors and a clear legend title
+ggplot(trends_wa, aes(x = year)) +
+  geom_line(aes(y = Avg_Black_Rate, color = "Black Population"), size = 1.2) +
+  geom_line(aes(y = Avg_White_Rate, color = "White Population"), size = 1.2) +
+  scale_color_manual(values = c("Black Population" = "black", "White Population" = "blue")) +
+  labs(
+    title = "Trends in Prison Incarceration Rates by Race in Washington State",
+    x = "Year",
+    y = "Average Incarceration Rate per 100,000",
+    color = "Population Group"
+  ) +
+  theme_minimal()
 
-When we say "clear" or "human readable" titles and labels, that means that you should not just display the variable name.
+ggsave("trends_in_prison_incarceration_rates_wa.png")
 
-Here's an example of how to run an R script inside an RMarkdown file:
-
-``````{r, echo = FALSE, code = readLines("chart1_example.R")}
 ```
 
 ### Variable Comparison Chart
+```{r}
+data_wa_1990 <- data_wa %>%
+  filter(year == 1990) %>%
+  select(county_name, black_prison_pop_rate, white_prison_pop_rate)
 
-Include a chart. Make sure to describe why you included the chart, and what patterns emerged
+ggplot(data_wa_1990, aes(x = black_prison_pop_rate, y = white_prison_pop_rate)) +
+  geom_point(aes(color = county_name), alpha = 0.6, size = 4) +
+  geom_smooth(method = "lm", se = FALSE, color = "blue") + 
+  scale_color_viridis_d() + 
+  labs(title = "Comparison of Black vs. White Prison Incarceration Rates in Washington State (1990)",
+       x = "Black Prison Incarceration Rate (per 100,000)",
+       y = "White Prison Incarceration Rate (per 100,000)",
+       color = "County") +
+  theme_minimal() +
+  theme(legend.position = "right")
 
-The second chart that you will create and include will show how two different (continuous) variables are related to one another. Again, think carefully about what such a comparison means and what you want to communicate to your user (you may have to find relevant trends in the dataset first!). Here are some requirements to help guide your design:
+ggsave("black_vs_white_incarceration_rates.png")
 
-- You must have clear x and y axis labels
-- The chart needs a clear title 
-- If you choose to add a color encoding (not required), you need a legend for your different color and a clear legend title
+```
+
 
 ### Map
+```{r}
+incarceration_data <- read_csv("https://github.com/melaniewalsh/Neat-Datasets/raw/main/us-prison-jail-rates-1990-WA.csv")
 
-Include a chart. Make sure to describe why you included the chart, and what patterns emerged
+black_rates <- incarceration_data %>%
+  select(county_name, black_jail_pop_rate) %>%
+  arrange(desc(black_jail_pop_rate))  
 
-The last chart that you will create and include will show how a variable is distributed geographically. Again, think carefully about what such a comparison means and what you want to communicate to your user (you may have to find relevant trends in the dataset first!). Here are some requirements to help guide your design:
+ggplot(black_rates, aes(x = reorder(county_name, black_jail_pop_rate), y = black_jail_pop_rate)) +
+  geom_col(fill = "steelblue") +
+  coord_flip() +  
+  labs(
+    title = "Black Incarceration Rates by County in Washington State (1990)",
+    x = "County",
+    y = "Incarceration Rate per 100,000",
+    caption = "Data source: Neat Datasets"
+  ) +
+  theme_minimal() +
+  theme(axis.text.x = element_text(angle = 45, hjust = 1))  # Adjust text angle for better legibility
 
-- Your map needs a title
-- Your color scale needs a legend with a clear label
-- Use a map based coordinate system to set the aspect ratio of your map
+ggsave("black_incarceration_rates_by_county.png", width = 10, height = 8)
+
+```
 
